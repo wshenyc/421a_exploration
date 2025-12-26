@@ -1,0 +1,100 @@
+body, html {
+  margin: 0 auto;
+  font-family: 'Raleway', sans-serif;
+}
+
+*:focus {
+outline: 0;
+outline: none;
+}
+
+.main-map {
+  display: flex;
+}
+
+#sidebar {
+  flex: 1;
+  border: 1px solid black;
+  font-family: 'Raleway', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 312px;
+}
+
+
+#sidebar h3, h4 {
+  text-align: center;
+}
+
+#sidebar h3.LotItemHeader {
+  margin: 0;
+  padding-left: 0;
+  padding-top: 20px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  text-align: left;
+}
+#sidebar h3 {
+  padding: 20px;
+  padding-bottom: 0;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 25px;
+}
+
+#sidebar p, .buildingInfo {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#infoContainer::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+#infoContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+#infoContainer::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+#infoContainer::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+#infoContainer {
+  max-height: 280px;
+  max-height: calc(100vh - 555px);
+  overflow: auto;
+  margin-top: 20px;
+}
+
+
+.search_label {
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.actions {
+  padding: 0px 10px 0px 10px;
+}
+
+.map-overlay {
+  padding: 0 10px 5px 60px;
+}
+
+#resetBtn {
+  font-size: 12px;
+  float: right;
+  margin-top: 5px;
+}
+
+#mapContainer {
+  flex: 3.5;
+  height: 100vh;
+}
