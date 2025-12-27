@@ -14,7 +14,7 @@ var map = new mapboxgl.Map({
     container: 'mapContainer', // container ID
     style: 'mapbox://styles/mapbox/light-v9', // style URL
     center: [-73.92013728138733, 40.71401732482218,], // starting position [lng, lat]
-    zoom: 10.5 // starting zoom
+    zoom: 11 // starting zoom
 });
 
 
@@ -66,6 +66,17 @@ map.on('load', function () {
         }
     });
 
+    // add outlines for lots
+    map.addLayer({
+        'id': 'lot-outlines',
+        'type': 'line',
+        'source': 'taxlots',
+        'paint': {
+            'line-color': 'black',
+            'line-width': 0.5
+        }
+    });
+
 
     // add outlines for selected lots
     map.addSource('highlight-feature', {
@@ -102,9 +113,14 @@ map.on('load', function () {
 });
 
 //Target the span element used in the sidebar
-var addDisplay = document.getElementById('lot-info');
+var addDisplay = document.getElementById('infoContainer');
 
 map.on('click', 'tax-lots', function (e) {
+
+    const msg = document.getElementById('welcome-msg');
+    if (msg) {
+        msg.remove();
+    }
 
     // Set variables equal to the current feature's:
     // address, BBL, # of res units,
@@ -119,10 +135,8 @@ map.on('click', 'tax-lots', function (e) {
 
             return `<div>
         <div>
-         
           <strong>Address: </strong>&nbsp;
           <span id = "lot_add">${properties.Address}</span>
-          </h3>
         </div>
         <div>
           <strong>BBL:</strong>&nbsp;
@@ -142,13 +156,44 @@ map.on('click', 'tax-lots', function (e) {
           <li><b>For this type of 421-a, benefits start phasing out by year:</b> ${properties.phs_t_s === 'null' ? 'N/A' : properties.phs_t_s}</li>
           <li><b>Is this building’s 421-a phasing out?:</b> ${properties.flg_phs === 'null' ? 'N/A' : properties.flg_phs}</li>
           <li><b>Is this building receiving a version of 421-a(16)?*:</b> ${properties.f_42116}</li></ul>
-        <div style='font-size:14px; font-weight:bold;'>
+        <div>
         <i>*If the building receives 421-a(16) benefits, it cannot collect rent surcharges.</i>
         </div>
 
-        <hr>
+        <br/>
 
         <div>
+         <strong>Building Construction Details: </strong>&nbsp;
+          <ul>
+          <li><b>Construction Start Date:</b>${properties.apprvd_ === 'null' ? 'N/A' : properties.apprvd_}</li>
+          <li><b>Year Completed:</b> ${properties.yer_cmp === 'null' ? 'N/A' : properties.yer_cmp}</li>
+          <li><b>35 Years From Completed Construction:</b> ${properties.yr_c_35 === 'null' ? 'N/A' : properties.yr_c_35}</li>
+          </ul>
+
+          <div><b>When will my apartment's rent stabilization status end?</b>
+          <ul>
+          <li><b>For income-restricted units*:</b> ${properties.rs_inc === 'null' ? 'N/A' : properties.rs_inc}</li>
+          <li><b>For market-rate units:</b> ${properties.rs_mr === 'null' ? 'N/A' : properties.rs_mr}</li>
+          </ul>
+          <i>*Income-restricted units are rented via HPD's Housing Connect.</i>
+          </div>
+
+        </div>
+        </div>
+
+    
+        </div>       
+      </div>`
+        });
+
+        var RSElements = e.features.map((feature, idx) => {
+            var {
+                properties
+            } = feature;
+
+            return `<div>
+
+            <div>
         <strong>Is my landlord allowed to charge a 2.2% surcharge during the phase-out of the 421-a benefits?</strong>
         </div>
 
@@ -159,7 +204,8 @@ map.on('click', 'tax-lots', function (e) {
         <b>${properties.surchrg === 'null' ? 'N/A' : properties.surchrg}</b>
         </span>
 
-        <br/>
+       <div>
+       <br/>
 
         <span> The 2.2% surcharge is <b>not</b> collectible from the following categories of 
         units in such buildings:</span>
@@ -175,17 +221,18 @@ map.on('click', 'tax-lots', function (e) {
         as defined in 28 RCNY 6-09).</li>
       <li>All rental units in buildings that receive 421-a(16) benefits.</li>
       </ul>
-
-
-
-        </div>       
-      </div>`
+      </div>
+        
+        </div>`
         });
+
+
 
         map.setLayoutProperty('highlight-outline', 'visibility', 'visible');
         map.setLayoutProperty('highlight-fill', 'visibility', 'visible');
         map.getSource('highlight-feature').setData(e.features[0].geometry);
         infoContainer.innerHTML = LotElements.join('');
+        rsInfo.innerHTML = RSElements.join('');
 
         //zooming map to building that's been clicked
         var coords = flatten(e.features[0].geometry.coordinates)
@@ -206,14 +253,14 @@ map.on('click', 'tax-lots', function (e) {
 // recursive array flattener, return array of arrays, in geojson format,
 // i.e. [[lng, lat], [lng, lat]]
 function flatten(array) {
-  if (array[0] instanceof Array) {
-    if (!(array[0][0] instanceof Array)) {
-      return array
+    if (array[0] instanceof Array) {
+        if (!(array[0][0] instanceof Array)) {
+            return array
+        }
     }
-  }
-  var newArray = []
-  array.forEach(el => newArray = [...newArray, ...el])
-  return flatten(newArray)
+    var newArray = []
+    array.forEach(el => newArray = [...newArray, ...el])
+    return flatten(newArray)
 }
 
 

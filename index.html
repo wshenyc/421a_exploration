@@ -1,47 +1,169 @@
-
 <!doctype html>
 
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>NYC 421-a Map</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet'/>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="./data/building-regular.svg" rel="icon" type="image/x-icon" />
-  </head>
+  <title>NYC 421-a Map</title>
 
-  <body>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="./data/building-regular.svg" rel="icon" type="image/x-icon" />
 
-    <div class = "container-flex">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">421-a Map</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
 
-      <div class='box main-map'>
-        <div id='mapContainer'></div>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="modal" href="#faqModal">FAQ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="modal" href="#contactModal">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+</head>
+
+<body>
+
+  <div class="modal fade" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="faqModalLabel">FAQ</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <h6 style="font-weight: 900">What's this tool for?</h6>
+          <p>This tool helps tenants understand potential rent surcharges 
+            and changes to rent stabilization in buildings with expiring 
+            421-a tax exemptions. It brings together information from the 
+            Department of Finance, Department of Buildings, and HPD, 
+            which can otherwise be difficult to access.
+          </p>
+
+          <h6 style="font-weight: 900">Where are you getting your data/info from?</h6>
+          <p>
+            Property tax exemption data comes from a
+            <a href="https://data.cityofnewyork.us/City-Government/Property-Exemption-Detail/muvi-b6kx/data_preview"
+              target="_blank">
+              DOF open dataset</a>. Construction/permit data comes from a
+            <a href="https://data.cityofnewyork.us/Housing-Development/DOB-Job-Application-Filings/ic3t-wcy2/about_data"
+              target="_blank">
+              DOB open dataset</a> and
+            <a href="https://www.nyc.gov/content/planning/pages/resources/datasets/housing-project-level"
+              target="_blank">
+              DCP's Housing Database</a>.
+            </p>
+            <p>
+            421-a specific info comes from 
+            <a href="https://www.nyc.gov/assets/hpd/downloads/pdfs/services/421-a-tenant-fact-sheet.pdf"
+              target="_blank">
+              HPD's fact sheet</a>,
+              <a href="https://hcr.ny.gov/surcharges-and-fees"
+              target="_blank">
+             HCR's FAQ</a>, and 
+             <a href="https://www.nyc.gov/assets/finance/downloads/pdf/421a/421-a-benefit-schedule.pdf"
+              target="_blank">DOF's 421-a phaseout table</a>.
+          </p>
+
+          <h6 style="font-weight: 900">Can I see your code?</h6>
+          <p>Absolutely! For the code I used to make this page and my data analysis/cleaning process,
+            check out the  <a href="https://github.com/wshenyc/421a_exploration"
+              target="_blank">Github</a>.
+            
+          </p>
+
+          <h6 style="font-weight: 900">I have questions about my specific apartment. Can you help?</h6>
+          <p>Probably not unfortunately, but I'd recommend calling Met Council on Housing's 
+             <a href="https://www.metcouncilonhousing.org/program/tenants-rights-hotline/"
+              target="_blank">tenants' rights hotline</a>.
+            
+          </p>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-       <!-- Creating sidebar which will house all the values -->
-        <div id='benefit-info' class = 'box'>
-      
-            <div>
-              <span id="lot-info"></span>
-            </div> 
-                 <div id="infoContainer"></div>
-       
-            </div>
-    
+
+  <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="contactModalLabel">Contact</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          If you have any questions or feedback about my methodology, how to make this site work better, or anything at all, 
+          feel free to email me at: winnieshenny@gmail.com
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-flex">
+
+    <div class='box main-map'>
+      <div id='mapContainer'></div>
     </div>
 
-      <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
-      <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css" type="text/css">
-      <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
-      <script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
-      <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
-      <script src="js/scripts.js"></script>
-    </body>
-  </html>
+    <!-- Benefit & surcharge info -->
+    <div id='benefit-info' class='box'>
+
+      <div id='welcome-msg'>
+        <h4>Click on a lot to see more information!</h4>
+
+        <p>This map shows buildings that have received a 421-a benefit according to DOF's Property Exemption Open Data
+          file.
+          It's meant to serve as a starting place for a tenant to understand whether they may see a surcharge
+          added to their rent or if their stabilization status may be ending.</p>
+      </div>
+
+      <div id="infoContainer"></div>
+
+    </div>
+
+    <!-- Construction & rent stab info -->
+    <div id='rsInfo' class='box'>
+
+    </div>
+
+  </div>
+
+  <script
+    src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
+  <link rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css" type="text/css">
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+  <script src='https://unpkg.com/@turf/turf@6.3.0/turf.min.js'></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+    integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"
+    integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf"
+    crossorigin="anonymous"></script>
+  <script src="js/scripts.js"></script>
+</body>
+
+</html>

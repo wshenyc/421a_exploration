@@ -21,16 +21,15 @@ outline: none;
 
 .main-map {
   display: flex;
+  height: 100vh;
 }
+
 
 #benefit-info {
   flex: 1;
-  border: 1px solid black;
   font-family: 'Raleway', sans-serif;
-  height: 100vh;
-  overflow: hidden;
+  overflow: scroll;
   min-width: 312px;
-  order: 1;
 }
 
 
@@ -62,46 +61,16 @@ outline: none;
 
 #infoContainer {
   display: flex;
+  overflow: scroll;
 }
-
-#lot-info::-webkit-scrollbar {
-  width: 10px;
-}
-
-/* Track */
-#lot-info::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-/* Handle */
-#lot-info::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-/* Handle on hover */
-#lot-info::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-
 
 .search_label {
   font-weight: bold;
   margin-bottom: 3px;
 }
 
-.actions {
-  padding: 0px 10px 0px 10px;
-}
-
-#resetBtn {
-  font-size: 12px;
-  float: right;
-  margin-top: 5px;
-}
 
 #mapContainer {
   flex: 3.5;
-  height: 100vh;
+  /* height: 90vh; */
 }
