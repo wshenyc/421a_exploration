@@ -12,10 +12,11 @@ mapboxgl.accessToken = 'pk.eyJ1Ijoid3NoZW55YyIsImEiOiJja2w3YjNvd3YxZnc1Mm5wZWp1M
 //loading map
 var map = new mapboxgl.Map({
     container: 'mapContainer', // container ID
-    style: 'mapbox://styles/mapbox/light-v9', // style URL
-    center: [-73.92013728138733, 40.71401732482218,], // starting position [lng, lat]
-    zoom: 11 // starting zoom
+    style: 'mapbox://styles/mapbox/light-v11', // style URL
+    center: [-73.97604717577194, 40.750535691164316], // starting position [lng, lat]
+    zoom: 12 // starting zoom
 });
+
 
 
 // add navigation control in top right
@@ -33,6 +34,7 @@ var geocoder = new MapboxGeocoder({
 map.addControl(geocoder);
 
 map.on('load', function () {
+
 
     // adding base layer of boros
     map.addSource('boros', {
@@ -62,7 +64,8 @@ map.on('load', function () {
         'type': 'fill',
         'source': 'taxlots',
         'paint': {
-            'fill-color': '#5D3FD3'
+            'fill-color': '#1D4ED8',
+            'fill-opacity': 0.8
         }
     });
 
@@ -72,8 +75,8 @@ map.on('load', function () {
         'type': 'line',
         'source': 'taxlots',
         'paint': {
-            'line-color': 'black',
-            'line-width': 0.5
+            'line-color': '#64748B',
+            'line-width': 1
         }
     });
 
@@ -92,7 +95,7 @@ map.on('load', function () {
         'type': 'fill',
         'source': 'highlight-feature',
         'paint': {
-            'fill-color': '#eacf47 '
+            'fill-color': '#FDE68A'
         }
     });
 
@@ -101,9 +104,9 @@ map.on('load', function () {
         'type': 'line',
         'source': 'highlight-feature',
         'paint': {
-            'line-width': 3,
+            'line-width': 2,
             'line-opacity': 1,
-            'line-color': '#e83553'
+            'line-color': '#B45309'
         },
         'layout': {
             'line-join': 'bevel'
@@ -112,8 +115,26 @@ map.on('load', function () {
 
 });
 
+//tab boxes
+document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+        const target = tab.dataset.tab;
+
+        document.querySelectorAll(".tab").forEach(t =>
+            t.classList.remove("active")
+        );
+        document.querySelectorAll(".panel").forEach(p =>
+            p.classList.remove("active")
+        );
+
+        tab.classList.add("active");
+        document.getElementById(target).classList.add("active");
+
+        map.resize();
+    });
+});
+
 //Target the span element used in the sidebar
-var addDisplay = document.getElementById('infoContainer');
 
 map.on('click', 'tax-lots', function (e) {
 
@@ -127,6 +148,11 @@ map.on('click', 'tax-lots', function (e) {
     //tax benefit description, benefit start year, exemption end year
     //
 
+    const infoContainer = document.getElementById('infoContainer');
+    const surchargeInfo = document.getElementById('surchargeInfo');
+    const rsInfo = document.getElementById('rsInfo');
+
+
     if (e.features.length > 0) {
         var LotElements = e.features.map((feature, idx) => {
             var {
@@ -136,15 +162,15 @@ map.on('click', 'tax-lots', function (e) {
             return `<div>
         <div>
           <strong>Address: </strong>&nbsp;
-          <span id = "lot_add">${properties.Address}</span>
+          <span>${properties.Address}</span>
         </div>
         <div>
           <strong>BBL:</strong>&nbsp;
-          <span id="lot_bbl">${properties.BBL}</span>
+          <span">${properties.BBL}</span>
         </div>
         <div>
           <strong>Number of Residential Units:</strong>&nbsp;
-          <span id="units_res">${properties.UnitsRs}</span>
+          <span>${properties.UnitsRs}</span>
         </div>
         <div>
           <strong>Benefit Type:</strong>&nbsp;
@@ -162,6 +188,7 @@ map.on('click', 'tax-lots', function (e) {
 
         <br/>
 
+
         <div>
          <strong>Building Construction Details: </strong>&nbsp;
           <ul>
@@ -170,15 +197,17 @@ map.on('click', 'tax-lots', function (e) {
           <li><b>35 Years From Completed Construction:</b> ${properties.yr_c_35 === 'null' ? 'N/A' : properties.yr_c_35}</li>
           </ul>
 
-          <div><b>When will my apartment's rent stabilization status end?</b>
+        </div>
+
+        <div>
+         <strong>Other Relevant Info: </strong>&nbsp;
           <ul>
-          <li><b>For income-restricted units*:</b> ${properties.rs_inc === 'null' ? 'N/A' : properties.rs_inc}</li>
-          <li><b>For market-rate units:</b> ${properties.rs_mr === 'null' ? 'N/A' : properties.rs_mr}</li>
+          <li><b>In a Geographic Exclusion Area (GEA)?:</b><i> Working on it!</i></li>
+          <li><b>Receiving government assistance?:</b><i> Working on it!</i></li>
           </ul>
-          <i>*Income-restricted units are rented via HPD's Housing Connect.</i>
-          </div>
 
         </div>
+
         </div>
 
     
@@ -186,12 +215,17 @@ map.on('click', 'tax-lots', function (e) {
       </div>`
         });
 
-        var RSElements = e.features.map((feature, idx) => {
+        var SurchargeElements = e.features.map((feature, idx) => {
             var {
                 properties
             } = feature;
 
             return `<div>
+            <div>
+          <strong>Address: </strong>&nbsp;
+          <span>${properties.Address}</span>
+        </div>
+        <hr>
 
             <div>
         <strong>Is my landlord allowed to charge a 2.2% surcharge during the phase-out of the 421-a benefits?</strong>
@@ -226,27 +260,51 @@ map.on('click', 'tax-lots', function (e) {
         </div>`
         });
 
+        var RSElements = e.features.map((feature, idx) => {
+            var {
+                properties
+            } = feature;
+
+            return `<div>
+
+               <div>
+          <strong>Address: </strong>&nbsp;
+          <span class = "lot_add">${properties.Address}</span>
+        </div>
+        <hr>
+
+
+             <div><b>When will my apartment's rent stabilization status end?</b>
+          <ul>
+          <li><b>For income-restricted units*:</b> ${properties.rs_inc === 'null' ? 'N/A' : properties.rs_inc}</li>
+          <li><b>For market-rate units:</b> ${properties.rs_mr === 'null' ? 'N/A' : properties.rs_mr}</li>
+          </ul>
+          <i>*Income-restricted units are rented via HPD's Housing Connect.</i>
+          </div>
+
+             </div>`
+        });
+
 
 
         map.setLayoutProperty('highlight-outline', 'visibility', 'visible');
         map.setLayoutProperty('highlight-fill', 'visibility', 'visible');
         map.getSource('highlight-feature').setData(e.features[0].geometry);
         infoContainer.innerHTML = LotElements.join('');
+        surchargeInfo.innerHTML = SurchargeElements.join('');
         rsInfo.innerHTML = RSElements.join('');
 
         //zooming map to building that's been clicked
         var coords = flatten(e.features[0].geometry.coordinates)
         var turfFeatures = turf.points(coords);
         var newCenter = turf.center(turfFeatures);
-        var currentZoom = map.getZoom();
-        if (currentZoom >= 16) {
-        } else {
-            map.flyTo({
-                center: newCenter.geometry.coordinates,
-                zoom: 16,
-                speed: 1
-            })
-        }
+
+        map.flyTo({
+            center: newCenter.geometry.coordinates,
+            zoom: 16,
+            speed: 1
+        })
+
     }
 });
 

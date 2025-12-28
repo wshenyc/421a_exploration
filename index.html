@@ -16,7 +16,12 @@
   <link rel="stylesheet" href="css/styles.css">
   <link href="./data/building-regular.svg" rel="icon" type="image/x-icon" />
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+</head>
+
+<body>
+
+  <!-- navigation bar -->
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">421-a Map</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,10 +40,7 @@
     </div>
   </nav>
 
-</head>
-
-<body>
-
+  <!-- modals -->
   <div class="modal fade" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -49,10 +51,10 @@
         </div>
         <div class="modal-body">
           <h6 style="font-weight: 900">What's this tool for?</h6>
-          <p>This tool helps tenants understand potential rent surcharges 
-            and changes to rent stabilization in buildings with expiring 
-            421-a tax exemptions. It brings together information from the 
-            Department of Finance, Department of Buildings, and HPD, 
+          <p>This tool helps tenants understand potential rent surcharges
+            and changes to rent stabilization in buildings with expiring
+            421-a tax exemptions. It brings together information from the
+            Department of Finance, Department of Buildings, and HPD,
             which can otherwise be difficult to access.
           </p>
 
@@ -68,31 +70,29 @@
             <a href="https://www.nyc.gov/content/planning/pages/resources/datasets/housing-project-level"
               target="_blank">
               DCP's Housing Database</a>.
-            </p>
-            <p>
-            421-a specific info comes from 
+          </p>
+          <p>
+            421-a specific info comes from
             <a href="https://www.nyc.gov/assets/hpd/downloads/pdfs/services/421-a-tenant-fact-sheet.pdf"
               target="_blank">
               HPD's fact sheet</a>,
-              <a href="https://hcr.ny.gov/surcharges-and-fees"
-              target="_blank">
-             HCR's FAQ</a>, and 
-             <a href="https://www.nyc.gov/assets/finance/downloads/pdf/421a/421-a-benefit-schedule.pdf"
+            <a href="https://hcr.ny.gov/surcharges-and-fees" target="_blank">
+              HCR's FAQ</a>, and
+            <a href="https://www.nyc.gov/assets/finance/downloads/pdf/421a/421-a-benefit-schedule.pdf"
               target="_blank">DOF's 421-a phaseout table</a>.
           </p>
 
           <h6 style="font-weight: 900">Can I see your code?</h6>
           <p>Absolutely! For the code I used to make this page and my data analysis/cleaning process,
-            check out the  <a href="https://github.com/wshenyc/421a_exploration"
-              target="_blank">Github</a>.
-            
+            check out the <a href="https://github.com/wshenyc/421a_exploration" target="_blank">Github</a>.
+
           </p>
 
           <h6 style="font-weight: 900">I have questions about my specific apartment. Can you help?</h6>
-          <p>Probably not unfortunately, but I'd recommend calling Met Council on Housing's 
-             <a href="https://www.metcouncilonhousing.org/program/tenants-rights-hotline/"
-              target="_blank">tenants' rights hotline</a>.
-            
+          <p>Probably not unfortunately, but I'd recommend calling Met Council on Housing's
+            <a href="https://www.metcouncilonhousing.org/program/tenants-rights-hotline/" target="_blank">tenants'
+              rights hotline</a>.
+
           </p>
 
         </div>
@@ -113,7 +113,8 @@
             <span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
-          If you have any questions or feedback about my methodology, how to make this site work better, or anything at all, 
+          If you have any questions or feedback about my methodology, how to make this site work better, or anything at
+          all,
           feel free to email me at: winnieshenny@gmail.com
         </div>
         <div class="modal-footer">
@@ -123,17 +124,25 @@
     </div>
   </div>
 
+<!-- maps and info -->
   <div class="container-flex">
 
-    <div class='box main-map'>
-      <div id='mapContainer'></div>
+  <div class='main-map'>
+    <div id='mapContainer'></div>
+  </div>
+
+  <div class="tabbox">
+    <div class="tabs">
+      <button class="tab active" data-tab="tab1">Lot Info</button>
+      <button class="tab" data-tab="tab2">Rent Surcharge Info</button>
+      <button class="tab" data-tab="tab3">Rent Stabilization Info</button>
     </div>
 
     <!-- Benefit & surcharge info -->
-    <div id='benefit-info' class='box'>
+    <div id="tab1" class="panel active">
 
       <div id='welcome-msg'>
-        <h4>Click on a lot to see more information!</h4>
+        <h4>Click on a lot and tabs above to see more information.</h4>
 
         <p>This map shows buildings that have received a 421-a benefit according to DOF's Property Exemption Open Data
           file.
@@ -145,12 +154,22 @@
 
     </div>
 
-    <!-- Construction & rent stab info -->
-    <div id='rsInfo' class='box'>
+    <!-- rent surcharge info -->
+    <div id="tab2" class="panel">
+      <div id='surchargeInfo'></div>
+    </div>
+
+    <!-- Rent stabilization status -->
+     <div id="tab3" class="panel">
+      <div id='rsInfo'></div>
+    </div>
 
     </div>
 
-  </div>
+   
+
+
+    
 
   <script
     src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
