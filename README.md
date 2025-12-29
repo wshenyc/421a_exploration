@@ -4,8 +4,7 @@ This [tool](https://wshenyc.github.io/421a_exploration/) helps tenants understan
 
 ## Screenshots of the tool
 
-![Screenshot of the lot info tab](https://github.com/wshenyc/421a_exploration/blob/main/data/Screenshot%202025-12-27%20at%2010.05.26%20PM.png)
-![Screenshot of the rent surcharge tab](https://github.com/wshenyc/421a_exploration/blob/main/data/Screenshot%202025-12-27%20at%2010.05.50%20PM.png)
+![Screenshot of the tool](https://github.com/wshenyc/421a_exploration/blob/main/data/Screenshot%202025-12-28%20at%208.19.45%20PM.png)
 
 ## Coming next steps:
 - [ ] Add GEA shapefile
