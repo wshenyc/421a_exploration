@@ -151,6 +151,9 @@ map.on('click', 'tax-lots', function (e) {
     const infoContainer = document.getElementById('infoContainer');
     const surchargeInfo = document.getElementById('surchargeInfo');
     const rsInfo = document.getElementById('rsInfo');
+    const props = e.features[0].properties;
+
+
 
 
     if (e.features.length > 0) {
@@ -203,7 +206,11 @@ map.on('click', 'tax-lots', function (e) {
          <strong>Other Relevant Info: </strong>&nbsp;
           <ul>
           <li><b>In a Geographic Exclusion Area (GEA)?:</b><i> Working on it!</i></li>
-          <li><b>Receiving government assistance?:</b><i> Working on it!</i></li>
+          <li><b>Receiving government assistance?:</b> Check
+           <a id="acris-link" href="#" target="_blank">ACRIS</a> to see if there are any regulatory agreements.
+          </li>
+          
+
           </ul>
 
         </div>
@@ -291,8 +298,19 @@ map.on('click', 'tax-lots', function (e) {
         map.setLayoutProperty('highlight-fill', 'visibility', 'visible');
         map.getSource('highlight-feature').setData(e.features[0].geometry);
         infoContainer.innerHTML = LotElements.join('');
+
+        //acris link
+
+         onLotSelected({
+            borough: props.boro, 
+            block: props.block,
+            lot: props.lot
+        });
+
         surchargeInfo.innerHTML = SurchargeElements.join('');
         rsInfo.innerHTML = RSElements.join('');
+
+       
 
         //zooming map to building that's been clicked
         var coords = flatten(e.features[0].geometry.coordinates)
@@ -322,4 +340,24 @@ function flatten(array) {
 }
 
 
+//acris link 
+function buildAcrisLink({ borough, block, lot }) {
+  const baseUrl = "http://a836-acris.nyc.gov/bblsearch/bblsearch.asp";
 
+  const params = new URLSearchParams({
+    borough: borough,
+    block: String(block).padStart(5, "0"),
+    lot: String(lot).padStart(4, "0")
+  });
+
+  return `${baseUrl}?${params.toString()}`;
+}
+
+function onLotSelected(lotData) {
+  if (!lotData.borough || !lotData.block || !lotData.lot) return;
+
+  const linkEl = document.getElementById("acris-link");
+  if (!linkEl) return;
+
+  linkEl.href = buildAcrisLink(lotData);
+}

@@ -10,7 +10,8 @@ outline: none;
 }
 
 .navbar {
-  border-bottom: 1px solid #D1D5DB;
+  /* border-bottom: 1px solid #D1D5DB; */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .container-flex {
@@ -22,6 +23,7 @@ outline: none;
 .main-map {
   flex: 1;
   height: 100%;
+  border-top: 1px solid #ddd;
 }
 
 .tabbox {
@@ -29,6 +31,24 @@ outline: none;
   padding: 12px;
   overflow-y: auto;
   border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+
+/* Hover state */
+.tab:hover {
+  background-color: #e0e0e0;
+}
+
+/* Selected / active tab */
+.tab.active {
+  background-color: #7a7a7a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Optional: keep active color on hover */
+.tab.active:hover {
+  background-color: #7a7a7a;
 }
 
 
