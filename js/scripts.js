@@ -2,7 +2,7 @@
 // load final data initially so page doesn't lag when
 // selecting neighborhoods
 var TAX_FINAL_DATA = [];
-$.getJSON("./data/lots_421a.geojson", function (data) {
+$.getJSON("./data/lots_421a_v2.geojson", function (data) {
     TAX_FINAL_DATA = data
 })
 
