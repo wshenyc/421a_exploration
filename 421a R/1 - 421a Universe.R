@@ -2,18 +2,14 @@ library(tidyverse)
 
 `%notin%` = Negate(`%in%`)
 
-####setting up####
+####DOF####
 #exemption codes
 #https://data.cityofnewyork.us/City-Government/Exemption-Classification-Codes/myn9-hwsy/data_preview
 
-exmp_code <- read_csv("exmp_code.csv") %>% 
+exmp_code <- read_csv("Raw Data/Exemption_Classification_Codes_20260125.csv") %>% 
   janitor::clean_names() %>% 
   filter(grepl("421A", legal_ref) &
            !grepl("-C", exempt_code)) #just looking at 421a, ignoring construction
-
-
-#this is pre-filtered to just 421a based on col NYS_EXMP_CODE, if that is equal to 48806
-#https://data.cityofnewyork.us/City-Government/Property-Exemption-Detail/muvi-b6kx/data_preview 
 
 exmp_421a16 = c("5119","5120", "5121", "5122", "5123")
 
@@ -22,7 +18,9 @@ exmp_421a16 = c("5119","5120", "5121", "5122", "5123")
 phase_out = data.frame(exmp_code = c("5110","5113", "5114","5116","5117","5118"),
                        phase_out_start = c(3, 12, 22, 13, 3, 12))
 
-dof <- read_csv("Property_Exemption_Detail_20251208.csv") %>% 
+#this is pre-filtered to just 421a based on col NYS_EXMP_CODE, if that is equal to 48806
+#https://data.cityofnewyork.us/City-Government/Property-Exemption-Detail/muvi-b6kx/data_preview 
+dof <- read_csv("Raw Data/Property_Exemption_Detail_20260125.csv") %>% 
   janitor::clean_names() %>%
   select(parid, boro, block, lot, exmp_code,
          year, period,
@@ -39,9 +37,10 @@ dof <- read_csv("Property_Exemption_Detail_20251208.csv") %>%
 dof_year <- dof %>% 
   left_join(phase_out, by = "exmp_code") %>% 
   select(!c(no_years, eff_date)) %>% 
-  mutate(benefit_year = as.numeric(str_extract(description, "(..)(?=\\s?YR)")),
+  mutate(benefit_year = case_when(!grepl("EXT", description) ~ as.numeric(str_extract(description, "(..)(?=\\s?YR)")),
+                                  grepl("10 YR EXT", description) ~ as.numeric(str_extract(description, "(..)(?=\\s?YR)")) + 10,
+                                  grepl("15 YR EXT", description) ~ as.numeric(str_extract(description, "(..)(?=\\s?YR)")) + 15),
          exmp_end = benftstart + benefit_year - 1, #because year 0 is year 1 of benefit
-        
          current_benefit_year = case_when(exmp_end >= year(Sys.Date()) ~ as.character(year(Sys.Date()) + 1 - benftstart),
                                           exmp_end < year(Sys.Date()) ~ "Expired"),
          flag_421a16 = if_else(exmp_code %in% exmp_421a16, "Yes","No"), #can't collect surcharge
@@ -51,14 +50,10 @@ dof_year <- dof %>%
                                   as.numeric(current_benefit_year) < phase_out_start ~ "No"))
          
 
-#dof_year %>% write_csv("dof_421a_detail.csv")
+#dof_year %>% write_csv("Created Data/dof_421a_detail.csv")
 
 
-###noodling####
-#is benftstart and eff_date always the same value?
-#if so, why have 2 columns
-#okay, so these are always the same, sure hope benftstart means benefit start yknow
-
+###checking DOF data####
 #there are 19 exemptions where no of years is equal to 0, which feels random 
 sum(dof$no_years==0)
 
@@ -79,15 +74,15 @@ sum(dof$benftstart==0)
 #source: https://data.cityofnewyork.us/Housing-Development/DOB-Job-Application-Filings/ic3t-wcy2/data_preview
 #pre-filtered to job types of NB and doc # 01
 
-lots_421a <- read_csv("dof_421a_detail.csv")
+lots_421a <- read_csv("Created Data/dof_421a_detail.csv")
 
-dob <- read_csv("dob_job_filings.csv") %>% 
+dob <- read_csv("Raw Data/DOB_Job_Application_Filings_20260125.csv") %>% 
   janitor::clean_names() 
 
 #i really need 1 job per BBL
 #okay presumably a permit will happen before the exemption start date
 #so i need to find the job permit with a date that comes after that and hopefully that works
-hdb <- read_csv("HousingDB_post2010.csv") %>% 
+hdb <- read_csv("Raw Data/HousingDB_post2010.csv") %>% 
   janitor::clean_names() %>% 
   filter(job_type == "New Building" & job_status %notin% c("1. Filed Application",
                                                            "2. Approved Application"),
@@ -115,14 +110,15 @@ dob_cleaned <- dob %>%
   filter(bbl %in% c(lots_421a$parid))
 
 
-test <- dob_cleaned %>% 
+dob_small <- dob_cleaned %>% 
   mutate(approved = mdy(approved)) %>% #entire job has been approved by the plan examiner, applicant can now pull a permit
   group_by(bbl) %>% #same thing, multiple buildings on a lot, different job numbers
   slice_min(fully_permitted, with_ties = F)
-  
-test2 <- hdb_joined %>% 
+
+#joining the dob bis and hdb data   
+hdb_dob <- hdb_joined %>% 
   mutate(parid_join = as.character(parid)) %>% 
-  left_join(select(test,
+  left_join(select(dob_small,
                    job_number, doc_number,
                    job_status, job_status_descrp,
                    approved,
@@ -134,20 +130,15 @@ test2 <- hdb_joined %>%
                               likely_pre_2008 == "No", 
                             "No Date", "Fine"))
 
-
-#what if we look at just the boro block? that seems dangerous
-#doesnt seem like a reliable way of matching up with the buildings
-#geocoding against the tax map? if only the tax map had street names
-  
-
-missing_dates <- test2 %>% 
+#387 rows arent matching to a permit
+missing_dates <- hdb_dob %>% 
   filter(any_date == "No Date" & flag_421a16 == "No")  #okay it seems like the problem is sometimes tax lots have merged
 
 #these would be the ones i would want to scrape for tax lot data
 #missing_dates %>% write_csv("missing_date.csv")
 
-#im going to need to deal with this in a smarter way
-permit_phase_lots_421a <- test2 %>% 
+####surcharge and stabilization flags####
+permit_phase_lots_421a <- hdb_dob %>% 
   select(-c(job_number.x:job_status_descrp, any_date)) %>% 
   mutate(year_comp = year(signoff_date),
          year_comp_35 = year_comp + 34, #i have no idea if this is how this works
@@ -176,80 +167,7 @@ permit_phase_lots_421a <- test2 %>%
     surcharge = case_when(exmp_code %in% c(5110, 5117) ~ "8 increases, not to exceed 17.6%",
                           exmp_code %in% c(5113, 5118) ~ "4 increases, not to exceed 8.8%",
                           exmp_code %in% c(5116) ~ "8 increases, not to exceed 17.6%",
-                          exmp_code %in% c(5114) ~ "4 increases, not to exceed 8.8%")) 
+                          exmp_code %in% c(5114) ~ "4 increases, not to exceed 8.8%",
+                          exmp_code %in% exmp_421a16 ~ "This is a 421-a(16) benefit, cannot collect surcharges")) 
 
-#permit_phase_lots_421a %>% write_csv("permit_phase_lots_updated.csv")
-
-
-#pluto test
-####geoclientv2 test####
-library(httr)
-library(jsonlite)
-
-test_call <- GET(url = "https://api.nyc.gov/geoclient/v2/bbl?borough=manhattan&block=67&lot=1",
-                 add_headers(`Ocp-Apim-Subscription-Key`='61c37c9048a94f21b6feb79786a73f1a'))
-
-#well, I mean this works, this api call, haven't done this before
-#obviously it doesnt work to actually geocode these addresses that are missing a date 
-text <- content(test_call, "text", encoding = "UTF-8")
-get_bbl_json <- fromJSON(text, flatten = T)
-get_bbl_df <- as.data.frame(get_bbl_json)
-
-test <- do.call(rbind.data.frame, str(content(test_call)))
-
-#other work around is to get street addresses for the 520 bldgs
-#and then match those
-
-###noodling###
-
-test <- hdb %>% 
-  select(job_number,
-         job_status, permit_year, complt_year, class_a_net, bbl, address_num, address_st, date_permit) %>% 
-  group_by(bbl) %>% 
-  mutate(count = n()) %>% 
-  ungroup() #okay so the duplicates are for jobs that relate to multiple bldgs to the same BBL, so i think thats fine?
-
-  
-
-#okay this is not as neat as i'd like it to be
-#why is it so hard to figure out which building is which
-what <- hdb %>% 
-  filter(bbl == "4163500400") #this crazy giant tax lot in far rockaway
-#that's like a bungalow colony?
-
-hdb_small <- lots_421a %>% 
-  left_join(select(hdb,
-                   BBL, Job_Number, DatePermit),
-            by = c("parid"="BBL"))
-
-
-
-  
-test2 <- test %>% 
-  filter(is.na(fully_permitted)) %>% 
-  left_join(select(hdb,
-                   BBL, Job_Number, DatePermit),
-            by = c("parid"="BBL"))
-
-
-#okay what i want to do is
-#if the job doesn't have a doc 1
-#then select whatever job has a date, or if no date, then drop the row
-#
-
-test <- dob_cleaned %>% 
-  group_by(job_number) %>% 
-  mutate(doc_check = any(doc_number=="01")) #okay, so randomly 1,272 jobs don't have a doc no. 1
-
-
-#man, this data sucks
-#why is there no date for some of these and duplicate rows?
-
-
-
-
-
-
-
-
-
+#permit_phase_lots_421a %>% write_csv("Created Data/permit_phase_lots_updated.csv")

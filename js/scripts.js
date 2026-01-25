@@ -1,8 +1,7 @@
 
-// load final data initially so page doesn't lag when
-// selecting neighborhoods
+// load final data initially so page doesn't lag 
 var TAX_FINAL_DATA = [];
-$.getJSON("./data/lots_421a_v2.geojson", function (data) {
+$.getJSON("./data/lots_421a.geojson", function (data) {
     TAX_FINAL_DATA = data
 })
 
@@ -27,9 +26,15 @@ map.addControl(nav, 'top-left');
 //search bar
 
 var geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl: mapboxgl
+  accessToken: mapboxgl.accessToken,
+  mapboxgl: mapboxgl,
+  proximity: {
+    longitude: -73.94,
+    latitude: 40.70
+  },
+  bbox: [-74.25909, 40.477399, -73.700272, 40.917577] // NYC bounding box
 });
+
 
 map.addControl(geocoder);
 
@@ -75,8 +80,8 @@ map.on('load', function () {
         'type': 'line',
         'source': 'taxlots',
         'paint': {
-            'line-color': '#64748B',
-            'line-width': 1
+            'line-color': '#020617',
+            'line-width': 0.8
         }
     });
 
@@ -167,46 +172,63 @@ map.on('click', 'tax-lots', function (e) {
           <strong>Address: </strong>&nbsp;
           <span>${properties.Address}</span>
         </div>
+
         <div>
           <strong>BBL:</strong>&nbsp;
           <span">${properties.BBL}</span>
         </div>
+
         <div>
           <strong>Number of Residential Units:</strong>&nbsp;
-          <span>${properties.UnitsRs}</span>
+          <span>${properties.UnitsRes}</span>
         </div>
+
         <div>
           <strong>Benefit Type:</strong>&nbsp;
-          <span id="benefit_type">${properties.dscrptn}</span>
+          <span id="benefit_type">${properties.description}</span>
           <ul style='font-size:16px;'>
-          <li><b>Benefit Start Year:</b>${properties.bnftstr}</li>
-          <li><b>Benefit End Year:</b> ${properties.exmp_nd}</li>
-          <li><b>Years Receiving Benefit:</b> ${properties.crrnt__}</li>
-          <li><b>For this type of 421-a, benefits start phasing out by year:</b> ${properties.phs_t_s === 'null' ? 'N/A' : properties.phs_t_s}</li>
-          <li><b>Is this building’s 421-a phasing out?:</b> ${properties.flg_phs === 'null' ? 'N/A' : properties.flg_phs}</li>
-          <li><b>Is this building receiving a version of 421-a(16)?*:</b> ${properties.f_42116}</li></ul>
+          <li><b>Benefit Start Year:</b>${properties.benftstart}</li>
+          <li><b>Benefit End Year:</b> ${properties.exmp_end}</li>
+          <li><b>Years Receiving Benefit:</b> ${properties.current_benefit_year}</li>
+          <li><b>For this type of 421-a, benefits start phasing out by year:</b> ${properties.phase_out_start === 'null' ? 'N/A' : properties.phase_out_start}</li>
+          <li><b>Is this building’s 421-a phasing out?:</b> ${properties.flag_phasing === 'null' ? 'N/A' : properties.flag_phasing}</li>
+          <li><b>Is this building receiving a version of 421-a(16)?*:</b> ${properties.flag_421a16}</li></ul>
         <div>
         <i>*If the building receives 421-a(16) benefits, it cannot collect rent surcharges.</i>
         </div>
+        </div>
 
-        <br/>
+        <br>
 
-
-        <div>
-         <strong>Building Construction Details: </strong>&nbsp;
+         <div>
+         <strong>Building Construction & Benefit Details: </strong>&nbsp;
           <ul>
-          <li><b>Construction Start Date:</b>${properties.apprvd_ === 'null' ? 'N/A' : properties.apprvd_}</li>
-          <li><b>Year Completed:</b> ${properties.yer_cmp === 'null' ? 'N/A' : properties.yer_cmp}</li>
-          <li><b>35 Years From Completed Construction:</b> ${properties.yr_c_35 === 'null' ? 'N/A' : properties.yr_c_35}</li>
+          <li><b>Construction Start Date:</b> ${properties.approved === 'null' ? 'Working on finding permit info' : properties.approved}</li>
+          <li><b>Year Completed:</b> ${properties.year_comp === 'null' ? 'Working on finding permit info' : properties.year_comp}</li>
+          <li><b>Benefit End Year:</b> ${properties.exmp_end}</li>
           </ul>
 
         </div>
-
-        <div>
-         <strong>Other Relevant Info: </strong>&nbsp;
+      
+      <div>
+         <strong>GEA/Govt Assistance Info: </strong>&nbsp;
           <ul>
-          <li><b>In a Geographic Exclusion Area (GEA)?:</b><i> Working on it!</i></li>
-          <li><b>Receiving government assistance?:</b> Check
+          <li><b>In a Geographic Exclusion Area (GEA)?:</b>${properties.gea_flag}
+           <span class="info-wrapper">
+    <button class="info-icon" aria-label="More info">i</button>
+    <span class="popup">
+      Derived from HPD's list of BBLs that are part of the GEA. All of Manhattan is in the GEA.
+    </span>
+  </span></li>
+          <li><b>Receiving government assistance?:</b> 
+          This building is receiving/received the following subsidies: ${properties.program_summary === 'null' ? 'N/A' : properties.program_summary}.
+               <span class="info-wrapper">
+    <button class="info-icon" aria-label="More info">i</button>
+    <span class="popup">
+      Based on Furman Center's <a href="https://app.coredata.nyc/" target ="_blank"> CoreData</a>.
+    </span>
+  </span>
+          Check
            <a id="acris-link" href="#" target="_blank">ACRIS</a> to see if there are any regulatory agreements.
           </li>
           
@@ -215,11 +237,10 @@ map.on('click', 'tax-lots', function (e) {
 
         </div>
 
-        </div>
-
     
-        </div>       
-      </div>`
+       
+
+      `
         });
 
         var SurchargeElements = e.features.map((feature, idx) => {
@@ -242,7 +263,7 @@ map.on('click', 'tax-lots', function (e) {
          <span>A building receiving 421-a benefits may be allowed to add an annual 2.2% surcharge 
         to the rent for <i>some</i> units during each year of the phase-out period of the building’s 
         421-a benefits. <u>If this building is able to collect surcharges from your unit</u>, those surcharges would be limited to: 
-        <b>${properties.surchrg === 'null' ? 'N/A' : properties.surchrg}</b>
+        <b>${properties.surcharge === 'null' ? 'N/A' : properties.surcharge}</b>
         </span>
 
        <div>
@@ -263,7 +284,40 @@ map.on('click', 'tax-lots', function (e) {
       <li>All rental units in buildings that receive 421-a(16) benefits.</li>
       </ul>
       </div>
+
+      <br>
         
+        </div>
+        
+                <div>
+         <strong>GEA/Govt Assistance Info: </strong>&nbsp;
+          <ul>
+          <li>
+  <b>In a Geographic Exclusion Area (GEA)?:</b>
+    ${properties.gea_flag}
+    <span class="info-wrapper">
+    <button class="info-icon" aria-label="More info">i</button>
+    <span class="popup">
+      Derived from HPD's list of BBLs that are part of the GEA. All of Manhattan is in the GEA.
+    </span>
+  </span>
+</li>
+
+          <li><b>Receiving government assistance?:</b> 
+          This building is receiving/received the following subsidies: ${properties.program_summary === 'null' ? 'N/A' : properties.program_summary}.
+           <span class="info-wrapper">
+    <button class="info-icon" aria-label="More info">i</button>
+    <span class="popup">
+      Based on Furman Center's <a href="https://app.coredata.nyc/" target ="_blank"> CoreData</a>.
+    </span>
+  </span>
+          Check
+           <a id="acris-link" href="#" target="_blank">ACRIS</a> to see if there are any regulatory agreements.
+          </li>
+          
+
+          </ul>
+
         </div>`
         });
 
@@ -283,13 +337,31 @@ map.on('click', 'tax-lots', function (e) {
 
              <div><b>When will my apartment's rent stabilization status end?</b>
           <ul>
-          <li><b>For income-restricted units*:</b> ${properties.rs_inc === 'null' ? 'N/A' : properties.rs_inc}</li>
+          <li><b>For income-restricted units:</b> 
+           <span class="info-wrapper">
+    <button class="info-icon" aria-label="More info">i</button>
+    <span class="popup">
+      Income-restricted units are rented via HPD's Housing Connect.
+    </span>
+  </span>
+          ${properties.rs_inc === 'null' ? 'N/A' : properties.rs_inc}</li>
           <li><b>For market-rate units:</b> ${properties.rs_mr === 'null' ? 'N/A' : properties.rs_mr}</li>
           </ul>
-          <i>*Income-restricted units are rented via HPD's Housing Connect.</i>
           </div>
 
-             </div>`
+             </div>
+  
+        <div>
+         <strong>Building Construction & Benefit Details: </strong>&nbsp;
+          <ul>
+          <li><b>Construction Start Date:</b> ${properties.approved === 'null' ? 'Working on finding permit info' : properties.approved}</li>
+          <li><b>Year Completed:</b> ${properties.year_comp === 'null' ? 'Working on finding permit info' : properties.year_comp}</li>
+          <li><b>Benefit End Year:</b> ${properties.exmp_end}</li>
+          </ul>
+
+        </div>
+
+             `
         });
 
 
@@ -299,10 +371,11 @@ map.on('click', 'tax-lots', function (e) {
         map.getSource('highlight-feature').setData(e.features[0].geometry);
         infoContainer.innerHTML = LotElements.join('');
 
+
         //acris link
 
-         onLotSelected({
-            borough: props.boro, 
+        onLotSelected({
+            borough: props.boro,
             block: props.block,
             lot: props.lot
         });
@@ -310,7 +383,7 @@ map.on('click', 'tax-lots', function (e) {
         surchargeInfo.innerHTML = SurchargeElements.join('');
         rsInfo.innerHTML = RSElements.join('');
 
-       
+
 
         //zooming map to building that's been clicked
         var coords = flatten(e.features[0].geometry.coordinates)
@@ -342,22 +415,56 @@ function flatten(array) {
 
 //acris link 
 function buildAcrisLink({ borough, block, lot }) {
-  const baseUrl = "http://a836-acris.nyc.gov/bblsearch/bblsearch.asp";
+    const baseUrl = "http://a836-acris.nyc.gov/bblsearch/bblsearch.asp";
 
-  const params = new URLSearchParams({
-    borough: borough,
-    block: String(block).padStart(5, "0"),
-    lot: String(lot).padStart(4, "0")
-  });
+    const params = new URLSearchParams({
+        borough: borough,
+        block: String(block).padStart(5, "0"),
+        lot: String(lot).padStart(4, "0")
+    });
 
-  return `${baseUrl}?${params.toString()}`;
+    return `${baseUrl}?${params.toString()}`;
 }
 
 function onLotSelected(lotData) {
-  if (!lotData.borough || !lotData.block || !lotData.lot) return;
+    if (!lotData.borough || !lotData.block || !lotData.lot) return;
 
-  const linkEl = document.getElementById("acris-link");
-  if (!linkEl) return;
+    const linkEl = document.getElementById("acris-link");
+    if (!linkEl) return;
 
-  linkEl.href = buildAcrisLink(lotData);
+    linkEl.href = buildAcrisLink(lotData);
 }
+
+
+// attach click events to the info buttons
+
+const tabEl = document.getElementById("tabContainer");
+const BUFFER = 10; // flip 10px before hitting the map
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("info-icon")) {
+    e.stopPropagation();
+
+    const wrapper = e.target.closest(".info-wrapper");
+    const popup = wrapper.querySelector(".popup");
+
+    // reset
+    popup.classList.remove("flip-right");
+    popup.style.display = "block";
+    popup.classList.add("open");
+
+    const popupRect = popup.getBoundingClientRect();
+    const mapRect = tabEl.getBoundingClientRect();
+
+    // If it will overlap the tabbox on the left side, flip right
+    if (popupRect.left < mapRect.left + BUFFER) {
+      popup.classList.add("flip-right");
+    }
+
+  } else {
+    document.querySelectorAll(".popup.open").forEach(p => {
+      p.classList.remove("open");
+      p.style.display = "none";
+    });
+  }
+});
