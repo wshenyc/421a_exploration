@@ -217,7 +217,7 @@ map.on('click', 'tax-lots', function (e) {
            <span class="info-wrapper">
     <button class="info-icon" aria-label="More info">i</button>
     <span class="popup">
-      Derived from HPD's list of BBLs that are part of the GEA. All of Manhattan is in the GEA.
+      Based off of HPD's list of BBLs that are in the GEA but may not be accurate. All of Manhattan is in the GEA.
     </span>
   </span></li>
           <li><b>Receiving government assistance?:</b> 
@@ -298,7 +298,7 @@ map.on('click', 'tax-lots', function (e) {
     <span class="info-wrapper">
     <button class="info-icon" aria-label="More info">i</button>
     <span class="popup">
-      Derived from HPD's list of BBLs that are part of the GEA. All of Manhattan is in the GEA.
+      Based off of HPD's list of BBLs that are in the GEA but may not be accurate. All of Manhattan is in the GEA.
     </span>
   </span>
 </li>
