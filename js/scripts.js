@@ -203,7 +203,7 @@ map.on('click', 'tax-lots', function (e) {
          <div>
          <strong>Building Construction & Benefit Details: </strong>&nbsp;
           <ul>
-          <li><b>Construction Start Date:</b> ${properties.approved === 'null' ? 'Working on finding permit info' : properties.approved}</li>
+          <li><b>Construction Start Date:</b> ${properties.approved_display === 'null' ? 'Working on finding permit info' : properties.approved_display}</li>
           <li><b>Year Completed:</b> ${properties.year_comp === 'null' ? 'Working on finding permit info' : properties.year_comp}</li>
           <li><b>Benefit End Year:</b> ${properties.exmp_end}</li>
           </ul>
@@ -354,7 +354,7 @@ map.on('click', 'tax-lots', function (e) {
         <div>
          <strong>Building Construction & Benefit Details: </strong>&nbsp;
           <ul>
-          <li><b>Construction Start Date:</b> ${properties.approved === 'null' ? 'Working on finding permit info' : properties.approved}</li>
+          <li><b>Construction Start Date:</b> ${properties.approved_display === 'null' ? 'Working on finding permit info' : properties.approved_display}</li>
           <li><b>Year Completed:</b> ${properties.year_comp === 'null' ? 'Working on finding permit info' : properties.year_comp}</li>
           <li><b>Benefit End Year:</b> ${properties.exmp_end}</li>
           </ul>
